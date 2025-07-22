@@ -17,7 +17,7 @@ def mask_account_card(full_data: str) -> str:
     if not full_data.strip():
         raise ValueError("Получена пустая строка")
 
-    normalized = ' '.join(full_data.strip().split())
+    normalized = " ".join(full_data.strip().split())
 
     if normalized.lower().startswith("счет"):
         parts = normalized.split(maxsplit=1)
@@ -36,14 +36,14 @@ def mask_account_card(full_data: str) -> str:
 
         if len(number) != 16:
             # Собираем все цифры из строки
-            all_digits = ''.join(c for c in normalized if c.isdigit())
+            all_digits = "".join(c for c in normalized if c.isdigit())
             if len(all_digits) >= 16:
                 number = all_digits[-16:]  # Берем последние 16 цифр
             else:
                 raise ValueError(f"Номер карты должен содержать 16 цифр (получено {len(all_digits)})")
 
             # Название карты - все до номера
-        name = normalized[:-len(number)].strip()
+        name = normalized[: -len(number)].strip()
 
         return f"{name} {get_mask_card_number(number)}"
 
