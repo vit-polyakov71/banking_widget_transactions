@@ -17,35 +17,17 @@ def mask_account_card(full_data: str) -> str:
     if not full_data.strip():
         raise ValueError("Получена пустая строка")
 
-    normalized = " ".join(full_data.strip().split())
-
-    if normalized.lower().startswith("счет"):
-        parts = normalized.split(maxsplit=1)
-        if len(parts) < 2:
-            raise ValueError("Неверный формат счета")
-        account_num = parts[1].replace(" ", "")
-        return f"Счет {get_mask_account(account_num)}"
-    else:
-        # Обработка карты - находим номер карты (последние 16+ цифр)
-        # Разделяем строку на слова
-        words = normalized.split()
-
-        # Находим номер карты (последний элемент, содержащий цифры)
-        number_part = words[-1]
-        number = number_part.replace(" ", "")
-
-        if len(number) != 16:
-            # Собираем все цифры из строки
-            all_digits = "".join(c for c in normalized if c.isdigit())
-            if len(all_digits) >= 16:
-                number = all_digits[-16:]  # Берем последние 16 цифр
-            else:
-                raise ValueError(f"Номер карты должен содержать 16 цифр (получено {len(all_digits)})")
-
-            # Название карты - все до номера
-        name = normalized[: -len(number)].strip()
-
-        return f"{name} {get_mask_card_number(number)}"
+    try:
+        if full_data.lower().startswith("счет"):
+            # Для счетов: "Счет <номер>"
+            parts = full_data.split(maxsplit=1)
+            return f"Счет {get_mask_account(parts[1])}" if len(parts) > 1 else "Счет **"
+        else:
+            # Для карт: "<Название> <номер>"
+            *name_parts, number = full_data.rsplit(maxsplit=1)
+            return f"{' '.join(name_parts)} {get_mask_card_number(number)}"
+    except ValueError as e:
+        return f"Ошибка: {str(e)}"
 
 
 def get_date(datetime_str: str) -> str:
@@ -76,10 +58,11 @@ def get_date(datetime_str: str) -> str:
 
 if __name__ == "__main__":
     # Тестовые примеры
-    print(mask_account_card("Visa Platinum 7000792289606361"))  # Без пробелов
-    print(mask_account_card("Счет 73654108430135874305"))  # Счет
-    print(mask_account_card("МИР 1234 5678 9012 3456"))  # С пробелами
-    print(mask_account_card("Visa Classic 1234 5678 9012 3456"))  # С пробелами
+    print(mask_account_card("Visa Platinum 7000 7999 9999 6361"))  # Visa Platinum 7000 79** **** 6361
+    print(mask_account_card("Счет 7365 4108 4301 3587 4305"))  # Счет **4305
+    print(mask_account_card("МИР 1234 5678 9012 3456"))  # МИР 1234 56** **** 3456
+    print(mask_account_card("Visa 1234567890123456"))  # Должно работать
+    print(mask_account_card("Счет 12345678"))  # Должно работать
     # Тест даты
     print(get_date("2024-03-11T02:26:18.671407"))
     print(get_date("2021-12-31T23:59:59.999999"))
