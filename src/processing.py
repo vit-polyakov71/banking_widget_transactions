@@ -3,7 +3,15 @@ from typing import Dict, Any, List
 
 
 def filter_by_state(data: List[Dict[str, Any]], state: str = "EXECUTED") -> List[Dict[str, Any]]:
-    """Фильтрует список словарей по значению ключа 'state'."""
+    """Фильтрует список операций по статусу.
+
+    Args:
+        data: Список операций (словарей), которые нужно отфильтровать.
+        state: Статус операции для фильтрации. По умолчанию "EXECUTED".
+
+    Returns:
+        Список операций, отфильтрованных по указанному статусу.
+    """
     result_list: List[Dict[str, Any]] = []
     for item in data:
         if item.get("state") == state:
@@ -26,6 +34,7 @@ def sort_by_date(data: List[Dict[str, Any]], reverse: bool = True) -> List[Dict[
         return []
 
     def get_date(item: Dict[str, Any]) -> datetime:
+        """Вспомогательная функция для извлечения даты из элемента."""
         date_str = item.get("date")
         if not date_str:
             return datetime.min  # Если даты нет, помещаем в начало/конец
